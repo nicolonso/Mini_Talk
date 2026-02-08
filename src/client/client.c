@@ -11,41 +11,26 @@
 /* ************************************************************************** */
 
 #include "../../hdr/mini_talk.h"
+#include <signal.h>
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
 
-int ft_atoi_2(char *str)
-{
-	int	result;
-	int	sign;
-	
-	result = 0;
-	sign = 1;
-	while (*str == ' '  || (*str >= 9 && *str <= 13))
-		str++;
-	if(*str == '-' || *str == '+')
-	{
-		if (*str == '-')
-			sign = -sign;
-		str++;
-	}
-	while (*str >= '0' && *str <= '9')
-		result = (result * 10) + (*str++ - 48);
-	return (sign * result);
-}
-
-int	ft_strlen_2(char *str)
-{
-	int	i;
-
-	i = -1;
-	while (str[++i]);
-	return (i);
-}
-
-void char_bits(int pid, char c)
+static void char_bits(int pid, char c, int len)
 {
 	int i;
+	int j;
 
+	j = 0;
 	i = 0;
+	while (j < 32)
+	{
+		if ((len >> j++) & 1)
+			kill (pid, SIGUSR2);
+		else
+			kill (pid, SIGUSR1);
+		usleep(1500);
+	}
 	while (i < 8)
 	{
 		if ((c >> i++) & 1)
@@ -56,32 +41,44 @@ void char_bits(int pid, char c)
 		else
 			if (kill(pid, SIGUSR1) == -1)
 				exit(0);
-		usleep(1500);kill(pid, SIGUSR2) == -1		
+		usleep(1500);// I need to check this line later 	
 	}
 }
 
-
+static void	handler_sig(int signal)
+{
+	if (signal == SIGUSR2)
+	{
+		ft_printf("Sever recieve the string!\n");
+		exit(0);
+	}
+}
 
 int	main(int ac, char **av)
 {
 	int	pid;
 	int i;
+	int len;
 
 	if (ac == 3)
 	{
-		if (*av[1] == NULL)
+		if (av[1] == NULL)
 			return (1);
-		pid = ft_atoi_2(*av);
+		pid = ft_atoi(*av);
 		if (pid < 1)
 			return (1);
 		i = -1;
 		signal(SIGUSR1, signal_handler);
 		signal(SIGUSR1, signal_handler);
-		ft_strlen_2(*av[1]);
-		whiel(1)
+		len = ft_strlen((const)*av[1]);
+		while(1)
 		{
-			
+			char_bits(pid, av[1][++i], len);
+			if (!av[1][i])
+				break ;
 		}
+		pause();
 	}
 	return (0);
 }
+// What is the difference between do it all in the condition if is not 3 values

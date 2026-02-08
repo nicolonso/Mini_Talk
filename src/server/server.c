@@ -12,27 +12,33 @@
 
 #include "../../hdr/mini_talk.h"
 
-void signal_handler(int signal)
-{
-	static int	bit_count = 0;
-	static char	characther = 0;
+// static void signal_handler(int signal)
+// {
+// 	static int	bit_count = 0;
+// 	static char	characther = 0;
 	
-	if (signal == SIGUSR1)
-		characther |= (0 << bit_count);
-	else if (signal == SIGUSR2)
-		characther |= (1 << bit_count);
-	bit_count++;
-	if (bit_count == 8)
-	{
-		write (1, &characther, 1);
-		bit_count = 0;
-		characther = 0;
-	}
-}
+// 	if (signal == SIGUSR1)
+// 		characther |= (0 << bit_count);
+// 	else if (signal == SIGUSR2)
+// 		characther |= (1 << bit_count);
+// 	bit_count++;
+// 	if (bit_count == 8)
+// 	{
+// 		write (1, &characther, 1);
+// 		bit_count = 0;
+// 		characther = 0;
+// 	}
+// }
+
+// I nned to change a little bit signal handlerto be able to allocate memmory 
 
 
 
 int main(void)
 {
+	int pid;
+
+	pid = getpid();
+	ft_printf("Pid : %i\n", pid);
 	return (0);
 }

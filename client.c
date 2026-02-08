@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minitalk.h"
+#include "hdr/mini_talk.h"
 
 int	ft_atoi(const char *str)
 {
