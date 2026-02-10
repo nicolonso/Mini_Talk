@@ -1,55 +1,50 @@
-#Standard
+# Makefile for Minitalk
 
-NAME  = client
-NAME  = server
+# Variables
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
 
-#Directories
-LIBFT				= ./Lib/libft.a
-HDR					= hdr/
-SRC_DIR				= src/
-OBJ_DIR				= obj/
+SERVER_NAME = server
+CLIENT_NAME = client
 
-# Compiler and CFlags
+SRC_DIR = src/
+OBJ_DIR = obj/
 
-CC					= cc
-CFLAGS				= -Wall -Wextra -Werror -I$(HDR)
-RM					= rm -fclean
+# Source files
+SERVER_SRCS = $(SRC_DIR)server.c
+CLIENT_SRCS = $(SRC_DIR)client.c
+UTILITIES_SRCS = $(SRC_DIR)utilities.c
+PRINTF_SRCS = $(SRC_DIR)ft_printf.c
 
-# Source Files
+# Object files
+SERVER_OBJS = $(OBJ_DIR)server.o $(OBJ_DIR)utilities.o $(OBJ_DIR)ft_printf.o
+CLIENT_OBJS = $(OBJ_DIR)client.o $(OBJ_DIR)utilities.o $(OBJ_DIR)ft_printf.o
 
-CLIENT_DIR			= $(SRC_DIR)client/client.c\
+# Default rule: Build both server and client
+all: $(SERVER_NAME) $(CLIENT_NAME)
 
-SERVER_DIR			= $(SRC_DIR)server/server.c
+# Rule for server
+$(SERVER_NAME): $(SERVER_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
 
-# Concatenate all sources
-SRCS				= $(CLIENT_DIR) $(SERVER_DIR)
+# Rule for client
+$(CLIENT_NAME): $(CLIENT_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
 
-OBJ					= $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)%.o,$(SRCS))
+# Compile .c to .o
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-start:
-					@make all
-
-$(LIBFT):
-					@make -C ./Lib
-
-all:				$(NAME)
-
-$(NAME):			$(OBJ) $(LIBFT)
-					@$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME)
-
-$(OBJ_DIR)%.o:		$(SRC_DIR)%.c 
-					@mkdir -p $(@D)
-					@$(CC) $(CFLAGS) -c $< -o $@
-
+# Clean object files
 clean:
-					@$(RM) -r $(OBJ_DIR)
-					@make clean -C ./Lib
+	rm -rf $(OBJ_DIR)
 
-fclean: 			clean
-					@$(RM) $(NAME)
-					@$(RM) $(LIBFT)
+# Clean everything, including executables
+fclean: clean
+	rm -f $(SERVER_NAME) $(CLIENT_NAME)
 
-re: 				fclean all
+# Rebuild everything
+re: fclean all
 
-# Phony targets represent actions not files
-.PHONY: 			start all clean fclean re
+.PHONY: all clean fclean re
