@@ -14,21 +14,6 @@
 
 volatile sig_atomic_t g_server = BUSY;
 
-/* void end_handler(int signal)
-{
-    if (signal == SIGUSR1)
-    {
-        write(1, "OK\n", 2);
-        exit(EXIT_SUCCESS);
-    }
-}
-
-void ack_handler(int signal)
-{
-    if (signal == SIGUSR2)
-        g_server = READY;
-} */
-
 static void	end_handler(int sig)
 {
     (void)sig;
@@ -69,39 +54,57 @@ void    send_char(char c, __pid_t pid)
     }
 }
 
+void send_int(int n, __pid_t pid)
+{
+	__uint32_t	x;
+	int			bit;
+
+	x = n;
+	bit = 0;
+	//ft_printf("number = %d\n", n);
+	while (bit < 32)
+	{
+		if (x & (0x80000000u >> bit))
+            Kill(pid, SIGUSR1);
+        else
+            Kill(pid, SIGUSR2);
+        bit++;
+        while (BUSY == g_server)
+            usleep(42);
+        g_server = BUSY;
+	}
+}
+
 int main(int ac, char **av)
 {
     char *message;
     __pid_t pid;
     int i;
+	int len;
     
     if (ac != 3)
     {
         write(2, "Usage = ./client <PID> \"Message\"\n", 33);
         exit(EXIT_FAILURE);
     }
-    
+    if (!av[2])
+		return (EXIT_FAILURE);
     pid = ft_atoi(av[1]);
-    message = av[2];
-    
+    if (pid <= 0)
+        return (EXIT_FAILURE);
+    message = av[2]; // Handle this ""
+    len = ft_strlen (message);
+	if (len == 0)
+	{
+		write(2, "Send the correct message\n", 26);
+		exit (EXIT_FAILURE);
+	}
     Signal(SIGUSR1, ack_handler, false);
     Signal(SIGUSR2, end_handler, false);
     i = -1;
+	send_int(len, pid);
     while (message[++i])
         send_char(message[i], pid);
-    send_char('\0', pid);
     return (EXIT_SUCCESS);
 }
 
-//Include this in utilities.
-
-/* void ft_srtlen(char *str, __pid_t pid)
-{
-    int i;
-
-    i = -1;
-    while (str[++i]);
-    
-    //Implement here kill Function to send the leng and the allocate the enough s[ace]
-     
-} */
