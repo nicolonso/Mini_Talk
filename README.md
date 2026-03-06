@@ -117,14 +117,3 @@ Bitwise operations in C
 https://www.geeksforgeeks.org/bitwise-operators-in-c-cpp/
 
 ---
-
-## AI Usage
-
-AI tools were used during the development of this project for:
-
-* Understanding UNIX signal behaviour
-* Reviewing signal handling strategies
-* Debugging synchronization issues
-* Improving testing strategies
-
-All explanations were reviewed and the final code was written and understood by the author.
