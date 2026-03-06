@@ -21,10 +21,6 @@ static void	end_handler(int sig)
 	exit(EXIT_SUCCESS);
 }
 
-/**
- * ack_handler - Handles server's acknowledgment signals
- * @sig: Signal number (unused)
- */
 static void	ack_handler(int sig)
 {
     (void)sig;
@@ -39,8 +35,6 @@ void    send_char(char c, __pid_t pid)
     
     while (bit < CHAR_BIT)
     {
-        //Bitwise Operations
-        // A -> 01000001
         if (c & (0X80 >> bit))
             Kill(pid, SIGUSR1);
         else
@@ -61,7 +55,6 @@ void send_int(int n, __pid_t pid)
 
 	x = n;
 	bit = 0;
-	//ft_printf("number = %d\n", n);
 	while (bit < 32)
 	{
 		if (x & (0x80000000u >> bit))
@@ -77,34 +70,24 @@ void send_int(int n, __pid_t pid)
 
 int main(int ac, char **av)
 {
-    char *message;
-    __pid_t pid;
-    int i;
-	int len;
-    
+	t_client c;
+	int i;
+
     if (ac != 3)
     {
-        write(2, "Usage = ./client <PID> \"Message\"\n", 33);
+		write(2, "Usage = ./client <PID> \"Message\"\n", 33);
         exit(EXIT_FAILURE);
     }
     if (!av[2])
 		return (EXIT_FAILURE);
-    pid = ft_atoi(av[1]);
-    if (pid <= 0)
-        return (EXIT_FAILURE);
-    message = av[2]; // Handle this ""
-    len = ft_strlen (message);
-	if (len == 0)
-	{
-		write(2, "Send the correct message\n", 26);
-		exit (EXIT_FAILURE);
-	}
+	ft_initialize(&c);
+	if (ft_parsing(&c, av[1], av[2]))
+		return (EXIT_FAILURE);
     Signal(SIGUSR1, ack_handler, false);
     Signal(SIGUSR2, end_handler, false);
     i = -1;
-	send_int(len, pid);
-    while (message[++i])
-        send_char(message[i], pid);
+	send_int(c.len, c.pid);
+    while (c.msg[++i])
+        send_char(c.msg[i], c.pid);
     return (EXIT_SUCCESS);
 }
-

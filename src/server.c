@@ -12,137 +12,67 @@
 
 #include "../hdr/minitalk.h"
 
-void handler(int signal, siginfo_t *info, void *more_info)
+static int	ft_alloc_msg(t_state *s)
 {
-	(void)more_info;
-	static int stage = 0;
-	static __pid_t client = 0;
-	static __uint32_t	len = 0;
-	static __uint32_t	i = 0;
-	static int bit = 0;
-	static char c = 0;
-	static char *msg = NULL;
+	s->msg = malloc((size_t)s->len + 1);
+	if (!s->msg)
+		return (1);
+	s->msg[s->len] = '\0';
+	s->i = 0;
+	s->stage = 1;
+	s->bit = 0;
+	return (0);
+}
 
-	if (info->si_pid)
-		client = info->si_pid;
-	if (stage == 0)
+static void	ft_read_char(t_state *s, int signal)
+{
+	if (signal == SIGUSR1)
+		s->c |= (0x80 >> s->bit);
+	s->bit++;
+	if (s->bit == CHAR_BIT)
 	{
-		if (SIGUSR1 == signal)
-			len |= (0x80000000u >> bit);
-		bit++;
-		if (bit == 32)
+		s->msg[s->i++] = s->c;
+		s->c = 0;
+		s->bit = 0;
+		if (s->i == s->len)
+			ft_finish(s);
+	}
+}
+
+static void	ft_handle_signal(t_state *s, int signal)
+{
+	if (s->stage == 0)
+	{
+		ft_read_len(s, signal);
+		if (s->bit == 32)
 		{
-			msg = malloc((size_t)len + 1);
-			if (!msg)
-			{
-				stage = 0;
-				len = 0;
-				bit = 0;
-				return ;
-			}
-			msg[len] = '\0';
-			i = 0;
-			stage = 1;
-			bit = 0;
+			if (ft_alloc_msg(s))
+				ft_reset(s);
 		}
 	}
 	else
-	{
-		// if (len == 0)
-		// {
-		// 	write(1, "\n", 1);
-    	// 	Kill(client, SIGUSR2);   // tell client done
-    	// 	// reset state
-   	 	// 	stage = 0;
-		// 	len = 0;
-		// 	bit = 0;
-		// 	client = 0;
-		// 	return;
-		// }
-		if (signal == SIGUSR1)
-			c |= (0x80 >> bit);
-		else if (SIGUSR2 == signal)
-        	c &= ~(0b10000000 >> bit);
-		bit++;
-		if (CHAR_BIT == bit)
-		{
-			msg[i++] = c;
-			c = 0;
-			bit = 0;
-			if (i == len)
-			{
-				write(1, msg, len);
-				write(1, "\n", 1);
-				free(msg);
-				msg = NULL;
-				stage = 0;
-				len = 0;
-				bit = 0;
-				Kill (client,SIGUSR2);
-				return ;
-			}
-		}
-	}
-	Kill (client,SIGUSR1);
+		ft_read_char(s, signal);
+	Kill(s->client, SIGUSR1);
 }
 
-/* void handler(int signal, siginfo_t *info, void *more_info)
+void	ft_handler(int signal, siginfo_t *info, void *context)
 {
+	static t_state	s;
 
-   (void)more_info;
-   static char      c = 0;
-   static int       bit = 0;
-   static __pid_t   Client = 0;
-   int key = 0;
-   char *message;
-
-   if (info->si_pid)
-        Client = info->si_pid;
-   if (SIGUSR1 == signal)
-        c |= (0b10000000 >> bit);
-    else if (SIGUSR2 == signal)
-        c &= ~(0b10000000 >> bit);
-    bit++;
-
-    if (CHAR_BIT == bit)
-    {
-        bit = 0;
-		if (c == '\0')
-        {
-            write(STDOUT_FILENO, "\n", 1);
-            Kill(Client, SIGUSR2);
-            c = 0;
-            return ;
-        }
-        write(STDOUT_FILENO, &c, 1);
-        c = 0;
-    }
-    Kill(Client, SIGUSR1);
-} */
-
-
+	(void)context;
+	if (info && info->si_pid)
+		s.client = info->si_pid;
+	ft_handle_signal(&s, signal);
+}
 int main(void)
 {
     __pid_t PID;
 
     PID = getpid();
     ft_printf("PID : %d \n", PID);
-
-    //Wrapper function to KISS(Keep it Simple)
-    Signal(SIGUSR1, handler, true);
-    Signal(SIGUSR2, handler, true);
-	//ft_printf("test\n");
+    Signal(SIGUSR1, ft_handler, true);
+    Signal(SIGUSR2, ft_handler, true);
     while (252151)
         pause();
-    
     return(0);
 }
-
-// ------------------------------------------------------ Notes--------------------------------------------------------------------------------------
-/* Now is workin with the exception of the emoticons, so basically what I need to now is change the approach of my fft_strlen, and not send an integer instead of
-char by char 
-
-It isnt workingwhen i send "" , I nned to handle thta in my client or in my server ???
-that is a good a question
-I need to review  muy str len 
- */

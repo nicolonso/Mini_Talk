@@ -14,11 +14,12 @@ OBJ_DIR = obj/
 SERVER_SRCS = $(SRC_DIR)server.c
 CLIENT_SRCS = $(SRC_DIR)client.c
 UTILITIES_SRCS = $(SRC_DIR)utilities.c
+UTILITIES_TWO_SRCS = $(SRC_DIR)utilities_part_two.c
 PRINTF_SRCS = $(SRC_DIR)ft_printf.c
 
 # Object files
-SERVER_OBJS = $(OBJ_DIR)server.o $(OBJ_DIR)utilities.o $(OBJ_DIR)ft_printf.o
-CLIENT_OBJS = $(OBJ_DIR)client.o $(OBJ_DIR)utilities.o $(OBJ_DIR)ft_printf.o
+SERVER_OBJS = $(OBJ_DIR)server.o $(OBJ_DIR)utilities.o $(OBJ_DIR)utilities_part_two.o $(OBJ_DIR)ft_printf.o
+CLIENT_OBJS = $(OBJ_DIR)client.o $(OBJ_DIR)utilities.o $(OBJ_DIR)utilities_part_two.o $(OBJ_DIR)ft_printf.o
 
 # Default rule: Build both server and client
 all: $(SERVER_NAME) $(CLIENT_NAME)

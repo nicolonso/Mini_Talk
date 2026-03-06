@@ -41,7 +41,6 @@ void  Signal(int signo, void *handler, bool use_siginfo)
 {
     struct sigaction  sa = {0};
 
-    // Put the handler function inside sigaction
     if (use_siginfo)
     {
         sa.sa_flags = SA_SIGINFO;
@@ -49,15 +48,9 @@ void  Signal(int signo, void *handler, bool use_siginfo)
     }
     else
         sa.sa_handler = handler;
-
-    // Block SIGUSR1 whle processing SIGUSR2 and viceversa
-    
     sigemptyset(&sa.sa_mask);
     sigaddset(&sa.sa_mask, SIGUSR1);
     sigaddset(&sa.sa_mask, SIGUSR2);
-
-    //Call the sigaction
-
     if (sigaction(signo, &sa, NULL) < 0)
     {
         write(2, "Sigaction failed\n", 12);
